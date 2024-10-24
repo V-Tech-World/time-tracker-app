@@ -60,7 +60,7 @@ function TaskList() {
               <td>
                 {task.tags.split(',').map(tag => (
                   <span key={tag} className="badge bg-secondary me-1">
-                    Tag {tag}
+                     {tag}
                   </span>
                 ))}
               </td>
