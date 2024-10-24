@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import API_BASE_URL from '../config'; // Assuming you've created a config file for the base URL
+import '../css/taskList.css'; 
 
 function TaskList() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [note, setNote] = useState(''); // State for the notepad
 
   // Fetch tasks from the API
   useEffect(() => {
@@ -25,12 +27,11 @@ function TaskList() {
     fetchTasks();
   }, []);
 
-  //delete Task 
+  // Delete Task 
   const handleDeleteTask = async (taskId) => {
-    const confirmeYourDelete = window.confirm("Are you sure you want to delete ? ");
-    if (confirmeYourDelete) {
-      try{
-
+    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+    if (confirmDelete) {
+      try {
         const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
           method: 'DELETE',
         });
@@ -42,7 +43,7 @@ function TaskList() {
           console.error("Failed to delete task:", response.statusText);
           alert("Failed to delete task. Please try again.");
         }
-      }catch (error) {
+      } catch (error) {
         console.error("Error deleting task:", error);
         alert("An error occurred while deleting the task.");
       }
@@ -58,55 +59,103 @@ function TaskList() {
   };
 
   if (loading) {
-    return <div>Loading tasks...</div>;
+    return <div className="text-center mt-4"><strong>Loading tasks...</strong></div>;
   }
 
   return (
-    <div className="container">
+    <div className="container mt-4">
       <Header />
-      <div className="d-flex justify-content-between align-items-center mt-4">
-        <h1>Task List</h1>
-        <button className="btn btn-primary" onClick={() => navigate('/add-task')}>Add New Task</button>
+      <div className="d-flex justify-content-between mb-4">
+        <div className="w-75">
+          <h1 className="text-primary">Task List</h1>
+          <button className="btn btn-primary" onClick={() => navigate('/add-task')}>Add New Task</button>
+          
+          <div className="card shadow mt-3">
+            <div className="card-body">
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Task Name</th>
+                    <th>Tags</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks.length > 0 ? tasks.map(task => (
+                    <tr key={task.id} className="hover-shadow">
+                      <td>{task.name}</td>
+                      <td>
+                        {task.tags.split(',').map(tag => (
+                          <span key={tag} className="badge bg-secondary me-1">
+                            {tag.trim()}
+                          </span>
+                        ))}
+                      </td>
+                      <td><span className="badge bg-success">Active</span></td>
+                      <td>
+                        <button className="btn btn-info btn-sm me-1" onClick={() => handleEdit(task.id)}>Edit</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                        <button className="btn btn-secondary btn-sm ms-1" onClick={() => handleViewDetails(task.id)}>View Details</button>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="4" className="text-center">No tasks found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar for Notepad, Watch, and Calendar */}
+        <div className="w-25 ms-4">
+          <div className="card shadow mb-4">
+            <div className="card-body">
+              <h5 className="card-title">Notepad</h5>
+              <textarea
+                className="form-control"
+                rows="10"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Write your notes here..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div className="card shadow mb-4">
+            <div className="card-body">
+              <h5 className="card-title">Watch</h5>
+              <div id="watch" className="text-center">
+                {/* Add your watch functionality here */}
+                <h4>{new Date().toLocaleTimeString()}</h4>
+              </div>
+            </div>
+          </div>
+
+          <div className="card shadow">
+            <div className="card-body">
+              <h5 className="card-title">Calendar</h5>
+              <div id="calendar" className="text-center">
+                {/* Add a simple calendar here */}
+                <p>{new Date().toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <table className="table table-striped mt-4">
-        <thead>
-          <tr>
-            <th>Task Name</th>
-            <th>Tags</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasks.length > 0 ? tasks.map(task => (
-            <tr key={task.id}>
-              <td>{task.name}</td>
-              <td>
-                {task.tags.split(',').map(tag => (
-                  <span key={tag} className="badge bg-secondary me-1">
-                     {tag}
-                  </span>
-                ))}
-              </td>
-              <td>Active</td>
-              <td>
-                <button className="btn btn-info btn-sm" onClick={() => handleEdit(task.id)}>Edit</button>
-                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(task.id)}>Delete</button>
-                <button className="btn btn-secondary btn-sm" onClick={() => handleViewDetails(task.id)}>View Details</button>
-              </td>
-            </tr>
-          )) : (
-            <tr>
-              <td colSpan="4">No tasks found.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
     </div>
   );
 }
 
 export default TaskList;
+
+
+
+
+
 
 
 

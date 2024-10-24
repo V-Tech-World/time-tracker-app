@@ -1,0 +1,21 @@
+.hover-shadow {
+    transition: all 0.2s ease;
+  }
+  
+  .hover-shadow:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background-color: #f8f9fa; 
+  }
+  
+  #watch {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff; 
+  }
+  
+  #calendar {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745; 
+  }
+  
