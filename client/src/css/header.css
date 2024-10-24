@@ -1,0 +1,40 @@
+/* Header.css */
+.navbar {
+    background: linear-gradient(to right, #007bff, #6f42c1); /* Gradient background */
+  }
+  
+  .nav-link {
+    color: #ffffff; /* White color for links */
+    transition: color 0.3s ease; /* Smooth transition for hover effect */
+  }
+  
+  .nav-link:hover {
+    color: #ffcc00; /* Gold color on hover */
+  }
+  
+  .dropdown-menu {
+    background-color: #343a40; /* Dark background for dropdown */
+  }
+  
+  .dropdown-item {
+    color: #ffffff; /* White color for dropdown items */
+  }
+  
+  .dropdown-item:hover {
+    background-color: #6f42c1; /* Purple color on hover */
+  }
+  
+  .form-control {
+    border: 1px solid #ffffff; /* White border for input */
+  }
+  
+  .btn-outline-light {
+    color: #ffffff; /* White color for button */
+    border-color: #ffffff; /* White border for button */
+  }
+  
+  .btn-outline-light:hover {
+    background-color: #ffffff; /* White background on hover */
+    color: #007bff; /* Blue text on hover */
+  }
+  

@@ -6,12 +6,13 @@ import API_BASE_URL from '../config'; // Assuming you've created a config file f
 const TaskEdit = () => {
   const { id } = useParams();  // Get the task ID from URL params
   const navigate = useNavigate();
-  
+
   const [task, setTask] = useState({
     name: '',
     tags: ''
   });
   const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState(''); // State to hold the success message
 
   // Fetch the task data from the API based on the task ID
   useEffect(() => {
@@ -20,8 +21,8 @@ const TaskEdit = () => {
         const response = await fetch(`${API_BASE_URL}/tasks/${id}`);
         const data = await response.json();
         setTask({
-          name: data.name || '',  
-          tags: data.tags || ''  
+          name: data.name || '',  // default to empty string if undefined
+          tags: data.tags || ''   // default to empty string if undefined
         });
         setLoading(false);
       } catch (error) {
@@ -45,9 +46,9 @@ const TaskEdit = () => {
         body: JSON.stringify(task)
       });
       if (response.ok) {
-        console.log("Task updated successfully");
-        // After save, redirect back to task list
-        navigate('/');
+        // Show success message and reset after 3 seconds
+        setSuccessMessage('Task updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000); // Clear the message after 3 seconds
       } else {
         console.error("Failed to update task");
       }
@@ -79,6 +80,14 @@ const TaskEdit = () => {
     <div className="container mt-4">
       <Header />
       <h2>Edit Task</h2>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="alert alert-success">
+          {successMessage}
+        </div>
+      )}
+
       <form onSubmit={handleSave}>
         <div className="mb-3">
           <label className="form-label">Task Name</label>
@@ -101,7 +110,10 @@ const TaskEdit = () => {
             onChange={handleTagsChange}
           />
         </div>
-        <button type="submit" className="btn btn-success">Save Changes</button>
+        <div className="d-flex justify-content-between">
+          <button type="submit" className="btn btn-success">Save Changes</button>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>Back</button>
+        </div>
       </form>
     </div>
   );
