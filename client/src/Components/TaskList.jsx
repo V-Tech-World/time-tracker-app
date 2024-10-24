@@ -25,6 +25,30 @@ function TaskList() {
     fetchTasks();
   }, []);
 
+  //delete Task 
+  const handleDeleteTask = async (taskId) => {
+    const confirmeYourDelete = window.confirm("Are you sure you want to delete ? ");
+    if (confirmeYourDelete) {
+      try{
+
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          setTasks(tasks.filter(task => task.id !== taskId));
+          alert("Task deleted successfully");
+        } else {
+          console.error("Failed to delete task:", response.statusText);
+          alert("Failed to delete task. Please try again.");
+        }
+      }catch (error) {
+        console.error("Error deleting task:", error);
+        alert("An error occurred while deleting the task.");
+      }
+    }
+  };
+
   const handleEdit = (taskId) => {
     navigate(`/edit-task/${taskId}`);
   };
@@ -67,7 +91,7 @@ function TaskList() {
               <td>Active</td>
               <td>
                 <button className="btn btn-info btn-sm" onClick={() => handleEdit(task.id)}>Edit</button>
-                <button className="btn btn-danger btn-sm">Delete</button>
+                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(task.id)}>Delete</button>
                 <button className="btn btn-secondary btn-sm" onClick={() => handleViewDetails(task.id)}>View Details</button>
               </td>
             </tr>
@@ -83,3 +107,14 @@ function TaskList() {
 }
 
 export default TaskList;
+
+
+
+
+
+
+
+
+
+
+

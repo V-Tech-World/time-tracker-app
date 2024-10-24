@@ -79,16 +79,16 @@ const TaskEdit = () => {
   return (
     <div className="container mt-4">
       <Header />
-      <h2>Edit Task</h2>
+      <h2 className="text-center mb-4">Edit Task</h2>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="alert alert-success">
+        <div className="alert alert-success text-center">
           {successMessage}
         </div>
       )}
 
-      <form onSubmit={handleSave}>
+      <form onSubmit={handleSave} className="bg-light p-4 rounded shadow">
         <div className="mb-3">
           <label className="form-label">Task Name</label>
           <input
@@ -98,6 +98,7 @@ const TaskEdit = () => {
             value={task.name}  // Ensure it's always a controlled component
             onChange={handleChange}
             required
+            placeholder="Enter task name"
           />
         </div>
         <div className="mb-3">
@@ -108,9 +109,10 @@ const TaskEdit = () => {
             name="tags"
             value={task.tags}  // Ensure it's always a controlled component
             onChange={handleTagsChange}
+            placeholder="Enter tags separated by commas"
           />
         </div>
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between mt-4">
           <button type="submit" className="btn btn-success">Save Changes</button>
           <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>Back</button>
         </div>
