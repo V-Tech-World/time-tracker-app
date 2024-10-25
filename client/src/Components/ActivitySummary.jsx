@@ -2,7 +2,7 @@ import Header from "./Header";
 
 function ActivitySummary() {
   return (
-    <div className="container">
+    <div className="container vh-100">
       <Header />
       <h2>Activity Summary</h2>
       {/* Date filter input */}

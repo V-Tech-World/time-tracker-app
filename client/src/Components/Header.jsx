@@ -31,33 +31,8 @@ function Header() {
             <li className="nav-item">
               <Link className="nav-link" to="/info">Info</Link>
             </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Settings
-              </a>
-              <ul className="dropdown-menu">
-                <li>
-                  <Link className="dropdown-item" to="/settings">General Settings</Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/user-management">User Management</Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/app-settings">App Settings</Link>
-                </li>
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/logout">Logout</Link>
-                </li>
-              </ul>
+            <li className="nav-item">
+              <Link className="nav-link" to="/settings">Settings</Link>
             </li>
           </ul>
           <form className="d-flex">

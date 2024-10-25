@@ -2,7 +2,7 @@ import Header from "./Header"
 
 const TaskFilter = () => {
   return (
-    <div className="container mt-4">
+    <div className="container vh-100">
       <Header />
     </div>
   )

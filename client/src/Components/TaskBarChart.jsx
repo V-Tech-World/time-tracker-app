@@ -2,7 +2,7 @@ import Header from "./Header"
 
 const TaskBarChart = () => {
   return (
-    <div className="container">
+    <div className="container vh-100">
       <Header />
       <h1>Task Bar Chart</h1>
     </div>

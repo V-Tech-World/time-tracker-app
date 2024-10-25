@@ -1,19 +1,18 @@
-import Header from "./Header"
-import  { useState } from 'react';
-import PropTypes from 'prop-types';
+import Header from "./Header";
+import { useState } from 'react';
 
-function TaskAdd ({ isEditing, task }) {
-  const [name, setName] = useState(task?.name || '');
-  const [tags, setTags] = useState(task?.tags || []);
-
-  const handleSave = () => {
-    // Handle save functionality
+function TaskAdd() {
+  const [name, setName] = useState('');
+  const [tags, setTags] = useState([]);
+  const handleSave = (e) => {
+    e.preventDefault();
+    // Handle save functionality here, e.g., calling an API to save the task
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container vh-100">
       <Header />
-      <h2>{isEditing ? 'Edit Task' : 'Add New Task'}</h2>
+      <h2>{ 'Add New Task'}</h2>
       <form onSubmit={handleSave}>
         <div className="mb-3">
           <label className="form-label">Task Name</label>
@@ -39,12 +38,6 @@ function TaskAdd ({ isEditing, task }) {
     </div>
   );
 }
-TaskAdd.propTypes = {
-  isEditing: PropTypes.bool.isRequired,
-  task: PropTypes.shape({
-    name: PropTypes.string,
-    tags: PropTypes.arrayOf(PropTypes.string)
-  })
-};
 
-export default  TaskAdd
+
+export default TaskAdd;

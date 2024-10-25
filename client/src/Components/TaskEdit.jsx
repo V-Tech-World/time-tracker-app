@@ -77,7 +77,7 @@ const TaskEdit = () => {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container vh-100">
       <Header />
       <h2 className="text-center mb-4">Edit Task</h2>
 

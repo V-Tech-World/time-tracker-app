@@ -23,7 +23,7 @@ function TaskDetail() {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container vh-100">
       <Header />
       <h2>Task Details: {task.name}</h2>
       <p><strong>Tags:</strong> {task.tags.join(', ')}</p>
