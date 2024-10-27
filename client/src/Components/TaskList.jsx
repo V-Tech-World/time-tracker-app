@@ -4,29 +4,42 @@ import Header from "./Header";
 import API_BASE_URL from "../config";
 import "../css/taskList.css";
 
-function TaskList() {
+const TaskList = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [note, setNote] = useState(""); // State for the notepad
+  const [note, setNote] = useState(""); 
+  const [tags, setTags] = useState({});
 
-  // Fetch tasks from the API
+  // Fetch tasks and tags from the API
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTasksAndTags = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/tasks`);
-        const data = await response.json();
-        setTasks(data);
+        const tasksResponse = await fetch(`${API_BASE_URL}/tasks`);
+        const tasksData = await tasksResponse.json();
+        setTasks(tasksData);
+        
+        const tagsResponse = await fetch(`${API_BASE_URL}/tags`);
+        const tagsData = await tagsResponse.json();
+        
+        // Create a map of tag IDs to tag names
+        const tagsMap = {};
+        tagsData.forEach(tag => {
+          tagsMap[tag.id] = tag.name;
+        });
+        setTags(tagsMap);
+        
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching tasks:", error);
+        console.error("Error fetching tasks or tags:", error);
         setLoading(false);
       }
     };
 
-    fetchTasks();
+    fetchTasksAndTags();
   }, []);
 
+  
   // Delete Task
   const handleDeleteTask = async (taskId) => {
     const confirmDelete = window.confirm(
@@ -52,7 +65,7 @@ function TaskList() {
     }
   };
 
-  const handleEdit = (taskId) => {
+  const handleEdit = (taskId) => {   
     navigate(`/edit-task/${taskId}`);
   };
 
@@ -98,9 +111,9 @@ function TaskList() {
                       <tr key={task.id} className="hover-shadow">
                         <td>{task.name}</td>
                         <td>
-                          {task.tags.split(",").map((tag) => (
-                            <span key={tag} className="badge bg-secondary me-1">
-                              {tag.trim()}
+                          {task.tags.split(",").map((tagId) => (
+                            <span key={tagId} className="badge bg-secondary me-1">
+                              {tags[tagId.trim()] || "Unknown"}
                             </span>
                           ))}
                         </td>
@@ -185,6 +198,6 @@ function TaskList() {
       </div>
     </div>
   );
-}
+};
 
 export default TaskList;
