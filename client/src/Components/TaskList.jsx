@@ -12,34 +12,33 @@ const TaskList = () => {
   const [tags, setTags] = useState({});
 
   // Fetch tasks and tags from the API
-  useEffect(() => {
-    const fetchTasksAndTags = async () => {
-      try {
-        const tasksResponse = await fetch(`${API_BASE_URL}/tasks`);
-        const tasksData = await tasksResponse.json();
-        setTasks(tasksData);
-        
-        const tagsResponse = await fetch(`${API_BASE_URL}/tags`);
-        const tagsData = await tagsResponse.json();
-        
-        // Create a map of tag IDs to tag names
-        const tagsMap = {};
-        tagsData.forEach(tag => {
-          tagsMap[tag.id] = tag.name;
-        });
-        setTags(tagsMap);
-        
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching tasks or tags:", error);
-        setLoading(false);
-      }
-    };
+  const fetchTasksAndTags = async () => {
+    try {
+      const tasksResponse = await fetch(`${API_BASE_URL}/tasks`);
+      const tasksData = await tasksResponse.json();
+      setTasks(tasksData);
+      
+      const tagsResponse = await fetch(`${API_BASE_URL}/tags`);
+      const tagsData = await tagsResponse.json();
+      
+      // Create a map of tag IDs to tag names
+      const tagsMap = {};
+      tagsData.forEach(tag => {
+        tagsMap[tag.id] = tag.name;
+      });
+      setTags(tagsMap);
+      
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching tasks or tags:", error);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTasksAndTags();
   }, []);
 
-  
   // Delete Task
   const handleDeleteTask = async (taskId) => {
     const confirmDelete = window.confirm(
@@ -52,7 +51,8 @@ const TaskList = () => {
         });
 
         if (response.ok) {
-          setTasks(tasks.filter((task) => task.id !== taskId));
+          // Refresh tasks and tags after deletion
+          await fetchTasksAndTags();
           alert("Task deleted successfully");
         } else {
           console.error("Failed to delete task:", response.statusText);
@@ -94,6 +94,12 @@ const TaskList = () => {
             Add New Task
           </button>
 
+          <button className="btn btn-primary ms-3"
+            onClick={() => navigate("/manage-tags")}
+            >
+            Add or Manage Tags
+          </button>
+
           <div className="card shadow mt-3">
             <div className="card-body">
               <table className="table table-striped text-center">
@@ -112,9 +118,12 @@ const TaskList = () => {
                         <td>{task.name}</td>
                         <td>
                           {task.tags.split(",").map((tagId) => (
-                            <span key={tagId} className="badge bg-secondary me-1">
-                              {tags[tagId.trim()] || "Unknown"}
-                            </span>
+                            // Only show tags that exist in the current tags map
+                            tags[tagId.trim()] ? (
+                              <span key={tagId} className="badge bg-secondary me-1">
+                                {tags[tagId.trim()]}
+                              </span>
+                            ) : null // Skip if tag is not found
                           ))}
                         </td>
                         <td>
@@ -139,6 +148,7 @@ const TaskList = () => {
                           >
                             View Details
                           </button>
+                          
                         </td>
                       </tr>
                     ))

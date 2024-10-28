@@ -13,7 +13,6 @@ const TaskEdit = () => {
   });
   const [availableTags, setAvailableTags] = useState([]);
   const [tagNames, setTagNames] = useState({});
-  const [newTagName, setNewTagName] = useState('');
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -34,7 +33,6 @@ const TaskEdit = () => {
         const tagsData = await tagsResponse.json();
         setAvailableTags(tagsData);
 
-        // Initialize tagNames state from the fetched tags
         const names = tagsData.reduce((acc, tag) => {
           acc[tag.id] = tag.name;
           return acc;
@@ -51,15 +49,12 @@ const TaskEdit = () => {
     fetchTaskAndTags();
   }, [id]);
 
-  // Handle Save
   const handleSave = async (event) => {
     event.preventDefault();
     try {
       const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: task.name,
           tags: task.tags.join(',')
@@ -76,7 +71,6 @@ const TaskEdit = () => {
     }
   };
 
-  // Handle input changes for task name
   const handleChange = (event) => {
     const { name, value } = event.target;
     setTask((prevTask) => ({
@@ -85,60 +79,6 @@ const TaskEdit = () => {
     }));
   };
 
-  // Handle adding a new tag
-  const handleAddNewTag = async () => {
-    if (!newTagName.trim()) return;
-    try {
-      const response = await fetch(`${API_BASE_URL}/tags`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: newTagName })
-      });
-      const newTag = await response.json();
-
-      // Update availableTags, task tags, and tagNames state with the new tag
-      setAvailableTags((prevTags) => [...prevTags, newTag]);
-      setTask((prevTask) => ({
-        ...prevTask,
-        tags: [...prevTask.tags, String(newTag.id)]
-      }));
-      setTagNames((prevTagNames) => ({
-        ...prevTagNames,
-        [newTag.id]: newTag.name
-      }));
-
-      setNewTagName('');
-    } catch (error) {
-      console.error("Error adding new tag:", error);
-    }
-  };
-
-  // Handle deleting a tag
-  const handleDeleteTag = async (tagId) => {
-    try {
-      await fetch(`${API_BASE_URL}/tags/${tagId}`, {
-        method: 'DELETE'
-      });
-
-      // Remove the tag from availableTags, task tags, and tagNames
-      setAvailableTags((prevTags) => prevTags.filter((tag) => tag.id !== tagId));
-      setTask((prevTask) => ({
-        ...prevTask,
-        tags: prevTask.tags.filter((tag) => tag !== tagId)
-      }));
-      setTagNames((prevTagNames) => {
-        const updatedTagNames = { ...prevTagNames };
-        delete updatedTagNames[tagId];
-        return updatedTagNames;
-      });
-    } catch (error) {
-      console.error("Error deleting tag:", error);
-    }
-  };
-
-  // Toggle tag selection
   const handleTagToggle = (tagId) => {
     setTask((prevTask) => ({
       ...prevTask,
@@ -157,7 +97,6 @@ const TaskEdit = () => {
       <Header />
       <h2 className="text-center mb-4">Edit Task</h2>
 
-      {/* Success Message */}
       {successMessage && (
         <div className="alert alert-success text-center">
           {successMessage}
@@ -193,35 +132,8 @@ const TaskEdit = () => {
                 <label className="form-check-label" htmlFor={`tag-${tag.id}`}>
                   {tagNames[tag.id]}
                 </label>
-                <button
-                  type="button"
-                  className="btn btn-danger btn-sm ms-2"
-                  onClick={() => handleDeleteTag(tag.id)}
-                >
-                  Delete
-                </button>
               </div>
             ))}
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Add New Tag</label>
-          <div className="d-flex">
-            <input
-              type="text"
-              className="form-control"
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              placeholder="Enter new tag name"
-            />
-            <button
-              type="button"
-              className="btn btn-secondary ms-2"
-              onClick={handleAddNewTag}
-            >
-              Add Tag
-            </button>
           </div>
         </div>
 
