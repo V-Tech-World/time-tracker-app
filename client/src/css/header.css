@@ -37,3 +37,50 @@
     background-color: #ffffff; /* White background on hover */
     color: #007bff; /* Blue text on hover */
   }
+
+/* new added  */
+/* Global dark mode styles */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* Header and other components in dark mode */
+body.dark-mode .header {
+  background-color: #1f1f1f;
+  color: #ffffff;
+}
+
+/* Ensure TaskEdit form remains with a light theme */
+.task-edit-card {
+  background-color: #ffffff; /* Light background for TaskEdit */
+  color: #333333;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #dddddd;
+}
+
+/* Specific TaskEdit form styles that won't change */
+.task-edit-card .form-control {
+  background-color: #f9f9f9; /* Light background */
+  color: #333333;
+}
+
+.task-edit-card .form-check-input {
+  background-color: #ffffff;
+  border-color: #cccccc;
+}
+
+.task-edit-card .form-check-label {
+  color: #333333;
+}
+/* Ensure checkboxes are clearly visible in light and dark mode */
+.task-edit-card .form-check-input:checked {
+  background-color: #007bff; /* Choose a color that stands out */
+  border-color: #007bff;
+  box-shadow: 0 0 3px 1px rgba(0, 123, 255, 0.5);
+}
+
+.task-edit-card .form-check-label {
+  color: #333333; /* Consistent label color */
+}
