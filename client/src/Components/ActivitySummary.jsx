@@ -123,7 +123,7 @@ function ActivitySummary() {
   };
 
   return (
-    <div className="container vh-100">
+    <div className="container vh-250">
       <Header />
       <h2>Activity Summary</h2>
       <div className="mb-3">
