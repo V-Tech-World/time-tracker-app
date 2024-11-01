@@ -7,6 +7,7 @@ import API_BASE_URL from '../config';
 function Settings({ toggleTheme, toggleMode }) {
   const [theme, setTheme] = useState('light');
   const [mode, setMode] = useState('default');
+  const [tasksCount, setTasksCount] = useState(0);
 
   useEffect(() => {
     // Fetch current settings from the API
@@ -21,6 +22,11 @@ function Settings({ toggleTheme, toggleMode }) {
       }
     };
     fetchSettings();
+
+    //get the  active task IDs ffrom local storage
+    const activeTaskIds = JSON.parse(localStorage.getItem("activeTasks")) || [];
+    setTasksCount(activeTaskIds.length);
+    
   }, []);
 
   const handleThemeChange = async (newTheme) => {
@@ -30,6 +36,11 @@ function Settings({ toggleTheme, toggleMode }) {
   };
 
   const handleModeChange = async (newMode) => {
+    // if trying to activate a task and in single-task mode while active tasks count is more than 1
+    if (newMode === 'single-task' && tasksCount > 1) {
+      alert("You cannot switch to Single-Task mode when more than one task is active.");
+      return;
+    }
     setMode(newMode);
     toggleMode(newMode); // Update the mode in App
     await saveSettings(theme, newMode);
