@@ -8,7 +8,6 @@ import TaskAdd from './Components/TaskAdd';
 import TaskEdit from './Components/TaskEdit';
 import TaskFilter from './Components/TaskFilter';
 import ActivitySummary from './Components/ActivitySummary';
-import TaskBarChart from './Components/TaskBarChart';
 import IntervalList from './Components/IntervalList';
 import ManageTags from './Components/ManageTags';
 import axios from 'axios';
@@ -54,7 +53,6 @@ function App() {
           <Route path="/task/:id" element={<TaskDetail />} />
           <Route path="/filter-tasks" element={<TaskFilter />} />
           <Route path="/activity-summary" element={<ActivitySummary />} />
-          <Route path="/task-chart" element={<TaskBarChart />} />
           <Route path="/intervals/:Id" element={<IntervalList />} />
           <Route path="/manage-tags" element={<ManageTags />} />
           <Route 

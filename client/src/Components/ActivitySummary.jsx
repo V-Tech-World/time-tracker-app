@@ -3,6 +3,19 @@ import Header from "./Header";
 import API_BASE_URL from "../config";
 import axios from "axios";
 import { DateTime } from "luxon";
+import { Bar } from "react-chartjs-2"; // Import Bar chart
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js"; // Import necessary chart components
+
+// Register the necessary components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function ActivitySummary() {
   const [startDate, setStartDate] = useState("");
@@ -97,6 +110,18 @@ function ActivitySummary() {
     return `${hours} hour${hours !== 1 ? 's' : ''} and ${minutes} minute${minutes !== 1 ? 's' : ''}`;
   };
 
+  // Prepare data for the bar chart
+  const chartData = {
+    labels: tasks.map(task => task.name),
+    datasets: [{
+      label: 'Time Spent (minutes)',
+      data: tasks.map(task => totalTime[task.id] || 0),
+      backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1,
+    }],
+  };
+
   return (
     <div className="container vh-100">
       <Header />
@@ -118,18 +143,32 @@ function ActivitySummary() {
       </div>
       <div>
         <h3>Total Time Spent on Tasks</h3>
-        <ul>
-          {tasks.map((task) => {
-            const timeSpent = totalTime[task.id] || 0;
-            return (
-              <li key={task.id}>
-                <strong>{task.name}:</strong> {timeSpent > 0 ? formatDuration(timeSpent) : "No time recorded"}
-              </li>
-            );
-          })}
-        </ul>
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>Task Name</th>
+              <th>Time Spent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => {
+              const timeSpent = totalTime[task.id] || 0;
+              return (
+                <tr key={task.id}>
+                  <td><strong>{task.name}</strong></td>
+                  <td>{timeSpent > 0 ? formatDuration(timeSpent) : "No time recorded"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-      <button onClick={() => console.log(totalTime)}>test</button>
+
+      {/* Add the Bar chart */}
+      <div>
+        <h3>Time Spent Bar Chart</h3>
+        <Bar data={chartData} options={{ responsive: true }} />
+      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ function Info() {
       <div className="text-center">
         <h2 className="my-4">About</h2>
         <p className="lead">This application allows users to track their time spent on various tasks.</p>
-        <p className="text-muted">Version: 1.0.0</p>
+        <p className="lead">Version: 1.0.0</p>
         
         <h3 className="my-4">Contact Information</h3>
         <p>Name: <strong>Nirmal Dharmasena</strong></p>
