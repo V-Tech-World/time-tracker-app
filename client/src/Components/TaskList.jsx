@@ -9,9 +9,9 @@ const TaskList = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [note, setNote] = useState("");
   const [tags, setTags] = useState({});
   const [taskMode, setTaskMode] = useState("Default");
+  const [selectedTag, setSelectedTag] = useState("All");
 
   const fetchTasksTagsAndSettings = async () => {
     try {
@@ -51,7 +51,6 @@ const TaskList = () => {
     fetchTasksTagsAndSettings();
   }, []);
 
-
   const handleActivateTask = async (taskId) => {
     const activeTasksCount = tasks.filter(task => task.active).length;
     const task = tasks.find(task => task.id === taskId);
@@ -89,10 +88,6 @@ const TaskList = () => {
       return updatedTasks;
     });
   };
-  
-  
-  
-  
 
   const handleDeleteTask = async (taskId) => {
     const confirmDelete = window.confirm(
@@ -126,6 +121,11 @@ const TaskList = () => {
     navigate(`/task/${taskId}`);
   };
 
+  // Filter tasks based on selected tag
+  const filteredTasks = selectedTag === "All" 
+    ? tasks 
+    : tasks.filter(task => task.tags.split(",").map(tagId => tagId.trim()).includes(selectedTag));
+
   if (loading) {
     return (
       <div className="text-center mt-4">
@@ -152,7 +152,22 @@ const TaskList = () => {
           >
             Add or Manage Tags
           </button>
-          <label id = "taskMode"className="form-label ms-3">{taskMode} Mode</label>
+          <label id="taskMode" className="form-label ms-3">{taskMode} Mode</label>
+
+          {/* Tag Filter Dropdown */}
+          <div className="mt-3">
+            <label className="form-label me-2">Filter by Tag:</label>
+            <select
+              className="form-select d-inline w-auto"
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+            >
+              <option value="All">All</option>
+              {Object.entries(tags).map(([tagId, tagName]) => (
+                <option key={tagId} value={tagId}>{tagName}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="card shadow mt-3">
             <div className="card-body">
@@ -166,8 +181,8 @@ const TaskList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tasks.length > 0 ? (
-                    tasks.map((task) => (
+                  {filteredTasks.length > 0 ? (
+                    filteredTasks.map((task) => (
                       <tr key={task.id} className="hover-shadow">
                         <td>{task.name}</td>
                         <td>
@@ -235,42 +250,6 @@ const TaskList = () => {
         </div>
       </div>
       {/* Right Sidebar for Notepad, Watch, and Calendar */}
-      <div className="d-flex flex-row justify-content-start">
-        <div className="w-50 ms-4 mb-4">
-          <div className="card shadow mb-4 h-75">
-            <div className="card-body">
-              <h5 className="card-title">Notepad</h5>
-              <textarea
-                className="form-control h-50"
-                rows="10"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Write your notes here..."
-              ></textarea>
-            </div>
-          </div>
-        </div>
-        <div className="w-50 ms-4 mb-4">
-          <div>
-            <div className="card shadow mb-4">
-              <div className="card-body">
-                <h5 className="card-title">Watch</h5>
-                <div id="watch" className="text-center">
-                  <h4>{new Date().toLocaleTimeString()}</h4>
-                </div>
-              </div>
-            </div>
-            <div className="card shadow">
-              <div className="card-body">
-                <h5 className="card-title">Calendar</h5>
-                <div id="calendar" className="text-center">
-                  <p>{new Date().toLocaleDateString()}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

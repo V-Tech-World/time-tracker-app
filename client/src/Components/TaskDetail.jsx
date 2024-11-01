@@ -7,8 +7,10 @@ function TaskDetail() {
   const { id } = useParams();
   const [task, setTask] = useState(null);
   const [tags, setTags] = useState([]);
-  const [startTimeActivities, setStartTimeActivities] = useState([]);
-  const [endTimeActivities, setEndTimeActivities] = useState([]);
+  const [intervals, setIntervals] = useState([]);
+  const [editingTimestamp, setEditingTimestamp] = useState({ id: null, value: '' });
+  const [newTimestamp, setNewTimestamp] = useState({ start: '', end: '' });
+  const [error, setError] = useState('');
 
   const fetchTask = async () => {
     try {
@@ -35,20 +37,34 @@ function TaskDetail() {
         fetch(`${API_BASE_URL}/timesfortask/${id}/1`)
       ]);
 
-      const intervalsStart = await startResponse.json();
-      const intervalsEnd = await endResponse.json();
+      const startActivities = await startResponse.json();
+      const endActivities = await endResponse.json();
 
-      setStartTimeActivities(intervalsStart.map(interval => ({
-        id: interval.id,
-        timestamp: new Date(interval.timestamp),
-        type: 0
-      })));
+      const allActivities = [
+        ...startActivities.map(activity => ({ ...activity, type: 0 })),
+        ...endActivities.map(activity => ({ ...activity, type: 1 }))
+      ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-      setEndTimeActivities(intervalsEnd.map(interval => ({
-        id: interval.id,
-        timestamp: new Date(interval.timestamp),
-        type: 1
-      })));
+      const pairedIntervals = [];
+      let currentStart = null;
+
+      allActivities.forEach(activity => {
+        if (activity.type === 0) {
+          currentStart = activity;
+        } else if (currentStart) {
+          pairedIntervals.push({
+            start: currentStart,
+            end: activity
+          });
+          currentStart = null;
+        }
+      });
+
+      if (currentStart) {
+        pairedIntervals.push({ start: currentStart, end: null });
+      }
+
+      setIntervals(pairedIntervals);
     } catch (error) {
       console.error("Error fetching intervals:", error);
     }
@@ -61,8 +77,51 @@ function TaskDetail() {
 
   const calculateDuration = (start, end) => {
     if (!start || !end) return "N/A";
-    const duration = (end - start) / 1000; // duration in seconds
+    const duration = (new Date(end.timestamp) - new Date(start.timestamp)) / 1000;
     return duration > 0 ? `${duration} seconds` : "N/A";
+  };
+
+  const handleAddTimestamp = async () => {
+    const start = new Date(newTimestamp.start);
+    const end = new Date(newTimestamp.end);
+
+    if (!newTimestamp.start || !newTimestamp.end) {
+      setError("Both start and end times are required.");
+      return;
+    }
+
+    if (isNaN(start) || isNaN(end)) {
+      setError("Invalid date format. Please enter valid start and end times.");
+      return;
+    }
+
+    if (start >= end) {
+      setError("Start time must be before the end time.");
+      return;
+    }
+
+    setError('');
+
+    try {
+      // Add start timestamp
+      await fetch(`${API_BASE_URL}/timestamps`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timestamp: newTimestamp.start, task: id, type: '0' })
+      });
+      
+      // Add end timestamp
+      await fetch(`${API_BASE_URL}/timestamps`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timestamp: newTimestamp.end, task: id, type: '1' })
+      });
+
+      setNewTimestamp({ start: '', end: '' });
+      fetchIntervals();
+    } catch (error) {
+      console.error("Error adding timestamps:", error);
+    }
   };
 
   const handleDeleteTimestamp = async (timestampId) => {
@@ -70,35 +129,59 @@ function TaskDetail() {
       await fetch(`${API_BASE_URL}/timestamps/${timestampId}`, {
         method: "DELETE"
       });
-      fetchIntervals(); // Refresh intervals after deletion
+      fetchIntervals();
     } catch (error) {
       console.error("Error deleting timestamp:", error);
     }
   };
 
-  const handleUpdateTimestamp = async (timestampId, newTimestamp) => {
+  const handleEditTimestamp = (id, currentTimestamp) => {
+    setEditingTimestamp({ id, value: currentTimestamp });
+  };
+
+  const handleSaveTimestamp = async (timestampId) => {
+    const newTimestampDate = new Date(editingTimestamp.value);
+    const isValidDate = !isNaN(newTimestampDate);
+    if (!isValidDate) {
+      alert("Invalid date format. Please enter a valid date and time.");
+      return;
+    }
+  
+    const interval = intervals.find(
+      interval => interval.start?.id === timestampId || interval.end?.id === timestampId
+    );
+  
+    if (interval) {
+      if (interval.start && timestampId === interval.end?.id) {
+        const startTimestampDate = new Date(interval.start.timestamp);
+        if (newTimestampDate <= startTimestampDate) {
+          alert("End time must be after the start time. Please enter a valid end time.");
+          return;
+        }
+      }
+  
+      if (interval.end && timestampId === interval.start?.id) {
+        const endTimestampDate = new Date(interval.end.timestamp);
+        if (newTimestampDate >= endTimestampDate) {
+          alert("Start time must be before the end time. Please enter a valid start time.");
+          return;
+        }
+      }
+    }
+  
     try {
       await fetch(`${API_BASE_URL}/timestamps/${timestampId}`, {
         method: "PUT",
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          timestamp: newTimestamp,
-          task: id,
-          type: newTimestamp.type // type should be 0 or 1 based on start or end
-        })
+        body: JSON.stringify({ timestamp: editingTimestamp.value, task: id, type: editingTimestamp.type })
       });
-      fetchIntervals(); // Refresh intervals after update
+      fetchIntervals();
+      setEditingTimestamp({ id: null, value: '' });
     } catch (error) {
       console.error("Error updating timestamp:", error);
     }
   };
-
-  const handleAddInterval = () => {
-    console.log(tags);
-    console.log(task);
-    console.log(startTimeActivities);
-    console.log(endTimeActivities);
-  };
+  
 
   if (!task) {
     return <div>Loading...</div>;
@@ -109,6 +192,32 @@ function TaskDetail() {
       <Header />
       <h2>Task Details: {task.name}</h2>
       <p><strong>Tags: {tags.map(tag => tag.name).join(', ')}</strong></p>
+
+      {/* New Timestamp Form */}
+      <div className="my-3">
+        <h4>Add New Interval</h4>
+        <div>
+          <label>Start Time:</label>
+          <input
+            type="datetime-local"
+            value={newTimestamp.start}
+            onChange={(e) => setNewTimestamp({ ...newTimestamp, start: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>End Time:</label>
+          <input
+            type="datetime-local"
+            value={newTimestamp.end}
+            onChange={(e) => setNewTimestamp({ ...newTimestamp, end: e.target.value })}
+          />
+        </div>
+        {error && <p className="text-danger">{error}</p>}
+        <button className="btn btn-primary mt-2" onClick={handleAddTimestamp}>
+          Add Interval
+        </button>
+      </div>
+
       <h4>Activity Intervals</h4>
       <table className="table table-striped">
         <thead>
@@ -120,49 +229,85 @@ function TaskDetail() {
           </tr>
         </thead>
         <tbody>
-          {startTimeActivities.map((start, index) => {
-            const end = endTimeActivities[index];
-            return (
-              <tr key={start.id}>
-                <td>{start.timestamp.toLocaleString()}</td>
-                <td>{end ? end.timestamp.toLocaleString() : "N/A"}</td>
-                <td>{calculateDuration(start.timestamp, end?.timestamp)}</td>
-                <td>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteTimestamp(start.id)}
-                  >
-                    Delete Start
-                  </button>
-                  {end && (
+          {intervals.map((interval, index) => (
+            <tr key={index}>
+              <td>
+                {editingTimestamp.id === interval.start?.id ? (
+                  <input
+                    type="datetime-local"
+                    value={editingTimestamp.value}
+                    onChange={(e) => setEditingTimestamp({ ...editingTimestamp, value: e.target.value })}
+                  />
+                ) : (
+                  interval.start ? new Date(interval.start.timestamp).toLocaleString() : "N/A"
+                )}
+              </td>
+              <td>
+                {editingTimestamp.id === interval.end?.id ? (
+                  <input
+                    type="datetime-local"
+                    value={editingTimestamp.value}
+                    onChange={(e) => setEditingTimestamp({ ...editingTimestamp, value: e.target.value })}
+                  />
+                ) : (
+                  interval.end ? new Date(interval.end.timestamp).toLocaleString() : "N/A"
+                )}
+              </td>
+              <td>{calculateDuration(interval.start, interval.end)}</td>
+              <td>
+                {interval.start && (
+                  <>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteTimestamp(interval.start.id)}
+                    >
+                      Delete Start
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm ms-2"
+                      onClick={() => handleEditTimestamp(interval.start.id, interval.start.timestamp)}
+                    >
+                      Edit Start
+                    </button>
+                  </>
+                )}
+                {interval.end && (
+                  <>
                     <button
                       className="btn btn-danger btn-sm ms-2"
-                      onClick={() => handleDeleteTimestamp(end.id)}
+                      onClick={() => handleDeleteTimestamp(interval.end.id)}
                     >
                       Delete End
                     </button>
-                  )}
-                  <button
-                    className="btn btn-secondary btn-sm ms-2"
-                    onClick={() => handleUpdateTimestamp(start.id, prompt("Enter new start time", start.timestamp))}
-                  >
-                    Update Start
-                  </button>
-                  {end && (
                     <button
                       className="btn btn-secondary btn-sm ms-2"
-                      onClick={() => handleUpdateTimestamp(end.id, prompt("Enter new end time", end.timestamp))}
+                      onClick={() => handleEditTimestamp(interval.end.id, interval.end.timestamp)}
                     >
-                      Update End
+                      Edit End
                     </button>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+                  </>
+                )}
+                {editingTimestamp.id === interval.start?.id && (
+                  <button
+                    className="btn btn-success btn-sm ms-2"
+                    onClick={() => handleSaveTimestamp(interval.start.id)}
+                  >
+                    Save
+                  </button>
+                )}
+                {editingTimestamp.id === interval.end?.id && (
+                  <button
+                    className="btn btn-success btn-sm ms-2"
+                    onClick={() => handleSaveTimestamp(interval.end.id)}
+                  >
+                    Save
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
-      <button className="btn btn-primary mt-3" onClick={handleAddInterval}>Add Activity Interval</button>
     </div>
   );
 }
