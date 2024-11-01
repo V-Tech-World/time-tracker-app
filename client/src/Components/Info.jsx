@@ -2,9 +2,9 @@ import Header from "./Header";
 
 function Info() {
   return (
-    <div className="container vh-100">
+    <div className="container vh-250">
       <Header />
-      <div className="container vh-100 d-flex flex-column align-items-center justify-content-center">
+      <div className="container d-flex flex-column align-items-center justify-content-center">
       <div className="text-center">
         <h2 className="my-4">About</h2>
         <p className="lead">This application allows users to track their time spent on various tasks.</p>
