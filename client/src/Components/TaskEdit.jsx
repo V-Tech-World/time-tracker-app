@@ -16,7 +16,6 @@ const TaskEdit = () => {
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Fetch the task data and available tags
   useEffect(() => {
     const fetchTaskAndTags = async () => {
       try {
@@ -103,7 +102,7 @@ const TaskEdit = () => {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="bg-light p-4 rounded shadow">
+      <form onSubmit={handleSave} className="task-edit-card p-4 rounded shadow">
         <div className="mb-3">
           <label className="form-label">Task Name</label>
           <input
